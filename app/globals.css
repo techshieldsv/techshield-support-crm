@@ -1,0 +1,61 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 210 40% 98%;
+    --foreground: 220 36% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 220 36% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 36% 12%;
+    --primary: 202 96% 43%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 187 86% 47%;
+    --secondary-foreground: 218 42% 13%;
+    --muted: 212 28% 92%;
+    --muted-foreground: 217 15% 42%;
+    --accent: 193 85% 92%;
+    --accent-foreground: 202 96% 23%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 214 24% 87%;
+    --input: 214 24% 87%;
+    --ring: 199 92% 48%;
+  }
+
+  .dark {
+    --background: 220 32% 8%;
+    --foreground: 210 36% 96%;
+    --card: 220 26% 11%;
+    --card-foreground: 210 36% 96%;
+    --popover: 220 26% 11%;
+    --popover-foreground: 210 36% 96%;
+    --primary: 196 92% 49%;
+    --primary-foreground: 220 32% 8%;
+    --secondary: 176 73% 45%;
+    --secondary-foreground: 220 32% 8%;
+    --muted: 220 22% 16%;
+    --muted-foreground: 214 18% 68%;
+    --accent: 216 25% 18%;
+    --accent-foreground: 196 92% 74%;
+    --destructive: 0 62% 45%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 220 20% 20%;
+    --input: 220 20% 20%;
+    --ring: 196 92% 49%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+}
+
+.kanban-column {
+  scrollbar-width: thin;
+}

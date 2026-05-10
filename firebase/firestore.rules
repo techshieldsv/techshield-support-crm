@@ -1,0 +1,120 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function userDoc() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+
+    function role() {
+      return signedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        ? userDoc().data.role
+        : null;
+    }
+
+    function companyId() {
+      return signedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        ? userDoc().data.companyId
+        : null;
+    }
+
+    function staff() {
+      return role() in ["admin", "technician", "sales"];
+    }
+
+    function admin() {
+      return role() == "admin";
+    }
+
+    function sales() {
+      return role() in ["admin", "sales"];
+    }
+
+    function support() {
+      return role() in ["admin", "technician"];
+    }
+
+    function ownCompany() {
+      return signedIn() && resource.data.companyId == companyId();
+    }
+
+    function incomingOwnCompany() {
+      return signedIn() && request.resource.data.companyId == companyId();
+    }
+
+    function validDemoRole() {
+      return request.resource.data.role == "admin" && request.auth.token.email == "admin@techshieldsv.com"
+        || request.resource.data.role == "technician" && request.auth.token.email == "tecnico@techshieldsv.com"
+        || request.resource.data.role == "sales" && request.auth.token.email == "ventas@techshieldsv.com"
+        || request.resource.data.role == "client" && request.auth.token.email == "cliente@example.com";
+    }
+
+    match /users/{userId} {
+      allow read: if signedIn() && (request.auth.uid == userId || admin());
+      allow create, update: if admin() || signedIn()
+        && request.auth.uid == userId
+        && request.resource.data.email == request.auth.token.email
+        && request.resource.data.companyId is string
+        && validDemoRole();
+      allow delete: if admin();
+    }
+
+    match /companies/{docId} {
+      allow read: if signedIn() && (staff() || docId == companyId());
+      allow write: if admin();
+    }
+
+    match /contacts/{docId} {
+      allow read: if signedIn() && (staff() || ownCompany());
+      allow write: if signedIn() && (admin() || sales());
+    }
+
+    match /tickets/{docId} {
+      allow read: if signedIn() && (staff() || ownCompany());
+      allow create: if signedIn() && incomingOwnCompany();
+      allow update: if signedIn() && (admin() || support() || ownCompany());
+      allow delete: if admin();
+    }
+
+    match /ticket_comments/{docId} {
+      allow read: if signedIn() && (staff() || ownCompany());
+      allow create: if signedIn() && incomingOwnCompany();
+      allow update, delete: if admin();
+    }
+
+    match /leads/{docId} {
+      allow read: if signedIn() && sales();
+      allow write: if signedIn() && sales() && incomingOwnCompany();
+    }
+
+    match /opportunities/{docId} {
+      allow read: if signedIn() && sales();
+      allow write: if signedIn() && sales() && incomingOwnCompany();
+    }
+
+    match /quotations/{docId} {
+      allow read: if signedIn() && (sales() || ownCompany());
+      allow write: if signedIn() && sales() && incomingOwnCompany();
+    }
+
+    match /activities/{docId} {
+      allow read: if signedIn() && staff();
+      allow write: if signedIn() && staff() && incomingOwnCompany();
+    }
+
+    match /knowledge_base/{docId} {
+      allow read: if signedIn();
+      allow write: if signedIn() && staff();
+    }
+
+    match /notifications/{docId} {
+      allow read: if signedIn() && (admin() || resource.data.userId == request.auth.uid);
+      allow create: if signedIn() && staff();
+      allow update, delete: if admin();
+    }
+  }
+}

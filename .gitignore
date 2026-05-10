@@ -1,0 +1,17 @@
+node_modules
+.next
+out
+.env
+.env.local
+.env.*.local
+*.log
+vercel
+.vercel
+dist
+coverage
+chrome-profile
+edge-profile
+*.tmp
+*.bak
+dev-server.out.log
+dev-server.err.log
